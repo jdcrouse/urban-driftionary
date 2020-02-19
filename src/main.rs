@@ -5,16 +5,27 @@ extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
 
+use rocket::config::{Config, Environment};
 use rocket::Rocket;
 use rocket_contrib::json::{Json, JsonValue};
 use serde::{Deserialize, Serialize};
+use std::env;
 
 fn main() {
     rocket().launch();
 }
 
 fn rocket() -> Rocket {
-    rocket::ignite().mount("/define", routes![define])
+    let port: u16 = match env::var("PORT").unwrap().parse() {
+        Ok(n) => n,
+        _           => panic!("I need a number"),
+    };
+    
+    let config = Config::build(Environment::Staging)
+        .port(port)
+        .unwrap();
+
+    rocket::custom(config).mount("/define", routes![define])
 }
 
 #[derive(Serialize, Deserialize)]
