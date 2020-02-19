@@ -27,6 +27,7 @@ fn rocket() -> Rocket {
 
     rocket::custom(config)
         .mount("/define", routes![define])
+        .mount("/add", routes![add])
         .register(catchers![not_found])
 }
 
@@ -59,9 +60,17 @@ fn define(term: String) -> Option<Json<DefinitionResponse>> {
     }))
 }
 
+#[derive(Serialize, Deserialize)]
+struct NewDefinition {
+    term: String,
+    definition: String,
+    example_sentence: String,
+    tags: Vec<String>,
+}
+
 #[post("/", format = "json", data = "<definition>")]
-fn add(definition: Json<Definition>) -> JsonValue {
-    json!({ "status": "ok" }) // TODO
+fn add(definition: Json<NewDefinition>) -> JsonValue {
+    json!({ "status": "ok", "term_defined": definition.term }) // TODO
 }
 
 #[catch(404)]
