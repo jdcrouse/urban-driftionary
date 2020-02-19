@@ -41,19 +41,11 @@ fn get_port_from_env_or_default(default: u16) -> u16 {
 }
 
 #[get("/<term>")]
-fn define(term: String) -> Option<Json<DefinitionsResult>> {
-    Some(Json(DefinitionsResult {
-        term: String::from("Drift"),
-        definitions: vec![DefinitionDetail {
-            definition: String::from("A wonderful place to work"),
-            example_sentence: String::from("I sure do enjoy working at Drift"),
-            tags: vec![
-                String::from("company"),
-                String::from("marketing"),
-                String::from("sales"),
-            ],
-        }],
-    }))
+fn define(term: String) -> Result<Json<DefinitionsResult>, JsonValue> {
+    match get_definition(term) {
+        Some(defn) => Ok(Json(defn)),
+        _ => Err(json!({"status": "error", "reason": "Term is not defined."})),
+    }
 }
 
 #[post("/", format = "json", data = "<definition>")]

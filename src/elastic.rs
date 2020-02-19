@@ -24,3 +24,18 @@ pub struct AddDefinition {
 pub fn add_definition(definition: AddDefinition) -> Result<String, &'static str> {
     Ok(definition.term) // TODO
 }
+
+pub fn get_definition(term: String) -> Option<DefinitionsResult> {
+    Some(DefinitionsResult {
+        term: String::from("Drift"),
+        definitions: vec![DefinitionDetail {
+            definition: String::from("A wonderful place to work"),
+            example_sentence: String::from("I sure do enjoy working at Drift"),
+            tags: vec![
+                String::from("company"),
+                String::from("marketing"),
+                String::from("sales"),
+            ],
+        }],
+    })
+}

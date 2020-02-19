@@ -43,7 +43,7 @@ Else:
 {
         "status": "error",
         "reason": "Term is not defined."
-    }
+}
 ```
 
 ---
