@@ -15,18 +15,7 @@ fn main() {
 
 fn rocket() -> Rocket {
     rocket::ignite()
-        .mount("/", routes![index])
         .mount("/define", routes![define])
-}
-
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
-}
-
-#[get("/<term>")]
-fn define(term: String) -> Option<Json<Definition>> {
-    None // TODO
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,6 +23,21 @@ struct Definition {
     term: String,
     definition: String,
     example_sentence: String,
+    tags: Vec<String>,
+}
+
+#[get("/<term>")]
+fn define(term: String) -> Option<Json<Definition>> {
+    Some(Json(Definition {
+        term: String::from("Drift"),
+        definition: String::from("A wonderful place to work"),
+        example_sentence: String::from("I sure do enjoy working at Drift"),
+        tags: vec![
+            String::from("company"),
+            String::from("marketing"),
+            String::from("sales"),
+        ],
+    }))
 }
 
 #[post("/", format = "json", data = "<definition>")]
