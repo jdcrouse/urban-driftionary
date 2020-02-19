@@ -10,8 +10,8 @@ use rocket::Rocket;
 use rocket_contrib::json::{Json, JsonValue};
 use std::env;
 
-mod elastic;
-use elastic::*;
+mod db;
+use db::*;
 
 fn main() {
     rocket().launch();
@@ -30,12 +30,11 @@ fn rocket() -> Rocket {
 }
 
 fn get_port_from_env_or_default(default: u16) -> u16 {
-    let port_string = match env::var("PORT") {
-        Ok(n) => n,
-        _ => return default,
-    };
-    match port_string.parse() {
-        Ok(n) => n,
+    match env::var("PORT") {
+        Ok(port_string) => match port_string.parse() {
+            Ok(num) => num,
+            _ => default,
+        },
         _ => default,
     }
 }
