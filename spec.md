@@ -8,21 +8,6 @@ If the term has a definition:
 ```
 {
     "term": "Hello",
-    "definition": "A greeting",
-    "example_sentence": "Hello, world!"
-}
-```
-Else:
-```
-{
-    "error": "Term is not defined yet"
-} 
-```
-TODO: can a term have multiple definitions? 
-Alternative:
-```
-{
-    "term": "Hello",
     "definitions": [
         {
             "definition": "A Greeting",
@@ -35,6 +20,13 @@ Alternative:
     ]
 }
 ```
+Else:
+```
+{
+    "error": "Term is not defined yet"
+} 
+```
+
 ---
 
 ## Add a definition for a term
