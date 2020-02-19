@@ -1,9 +1,25 @@
 # Urban Driftionary API Spec
 
 ## Get the definition of a term
-#### Request
-GET `/define/<term>`
-### Example Response
+#### GET `/define/<term>`
+
+#### Response:
+```
+{
+    "term": str,
+    "definitions": [
+        {
+            "definition": str,
+            "example_sentence": str,
+            "tags": [str, ...]
+        },
+        ...
+    ]
+}
+```
+
+#### Example Response:
+
 If the term has a definition:
 ```
 {
@@ -11,11 +27,13 @@ If the term has a definition:
     "definitions": [
         {
             "definition": "A Greeting",
-            "example_sentence": "Hello, world!"
+            "example_sentence": "Hello, world!",
+            "tags": ["greeting", "marketing", "sales", "automation"]
         },
         {
             "definition": "The opposite of goodbye",
-            "example_sentence": "Don't say goodbye when you arrive, say hello."
+            "example_sentence": "Don't say goodbye when you arrive, say hello.",
+            "tags": ["greeting", "sales", "automation", "grammar"]
         }
     ]
 }
@@ -30,25 +48,37 @@ Else:
 ---
 
 ## Add a definition for a term
-#### Request
-POST `/add`
+#### POST `/add`
+```
+{
+    "term": str,
+    "definition": str,
+    "example_sentence": str,
+    "tags": [str, ...]
+}
+```
 
-body:
+Example Request:
 ```
 {
     "term": "Hello",
     "definition": "This is another definition for 'Hello'",
-    "example_sentence": "Hello from the other side."
+    "example_sentence": "Hello from the other side.",
+    "tags": ["greetings", "marketing", "automation"]
 }
 ```
 
 ---
 
-## Request for someone to define a term for you
-#### Request
-POST `/request`
+## Request for a term to be defined 
+#### POST `/request`
+```
+{
+    "term": str
+}
+```
 
-body:
+#### Example Request:
 ```
 {
     "term": "Hello"
