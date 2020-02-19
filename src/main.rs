@@ -16,6 +16,8 @@ fn main() {
 }
 
 fn rocket() -> Rocket {
+     // TODO: only use env var if it exists, otherwise default to config
+     // TODO: add environment configs
     let port: u16 = match env::var("PORT").unwrap().parse() {
         Ok(n) => n,
         _           => panic!("I need a number"),
