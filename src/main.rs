@@ -14,29 +14,35 @@ fn main() {
 }
 
 fn rocket() -> Rocket {
-    rocket::ignite()
-        .mount("/define", routes![define])
+    rocket::ignite().mount("/define", routes![define])
+}
+
+#[derive(Serialize, Deserialize)]
+struct DefinitionResponse {
+    term: String,
+    definitions: Vec<Definition>,
 }
 
 #[derive(Serialize, Deserialize)]
 struct Definition {
-    term: String,
     definition: String,
     example_sentence: String,
     tags: Vec<String>,
 }
 
 #[get("/<term>")]
-fn define(term: String) -> Option<Json<Definition>> {
-    Some(Json(Definition {
+fn define(term: String) -> Option<Json<DefinitionResponse>> {
+    Some(Json(DefinitionResponse {
         term: String::from("Drift"),
-        definition: String::from("A wonderful place to work"),
-        example_sentence: String::from("I sure do enjoy working at Drift"),
-        tags: vec![
-            String::from("company"),
-            String::from("marketing"),
-            String::from("sales"),
-        ],
+        definitions: vec![Definition {
+            definition: String::from("A wonderful place to work"),
+            example_sentence: String::from("I sure do enjoy working at Drift"),
+            tags: vec![
+                String::from("company"),
+                String::from("marketing"),
+                String::from("sales"),
+            ],
+        }],
     }))
 }
 
