@@ -1,5 +1,5 @@
 [package]
-name = "api"
+name = "ud-api"
 version = "0.1.0"
 authors = ["Jason Crouse <jcrouse@drift.com>"]
 edition = "2018"
