@@ -41,8 +41,9 @@ If the term has a definition:
 Else:
 ```
 {
-    "error": "Term is not defined yet"
-} 
+        "status": "error",
+        "reason": "Term is not defined."
+    }
 ```
 
 ---

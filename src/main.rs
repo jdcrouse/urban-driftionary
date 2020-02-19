@@ -16,18 +16,18 @@ fn main() {
 }
 
 fn rocket() -> Rocket {
-     // TODO: only use env var if it exists, otherwise default to config
-     // TODO: add environment configs
+    // TODO: only use env var if it exists, otherwise default to config
+    // TODO: add environment configs
     let port: u16 = match env::var("PORT").unwrap().parse() {
         Ok(n) => n,
-        _           => panic!("I need a number"),
+        _ => panic!("I need a number"),
     };
-    
-    let config = Config::build(Environment::Staging)
-        .port(port)
-        .unwrap();
 
-    rocket::custom(config).mount("/define", routes![define])
+    let config = Config::build(Environment::Staging).port(port).unwrap();
+
+    rocket::custom(config)
+        .mount("/define", routes![define])
+        .register(catchers![not_found])
 }
 
 #[derive(Serialize, Deserialize)]
@@ -62,4 +62,12 @@ fn define(term: String) -> Option<Json<DefinitionResponse>> {
 #[post("/", format = "json", data = "<definition>")]
 fn add(definition: Json<Definition>) -> JsonValue {
     json!({ "status": "ok" }) // TODO
+}
+
+#[catch(404)]
+fn not_found() -> JsonValue {
+    json!({
+        "status": "error",
+        "reason": "Resource was not found."
+    })
 }
