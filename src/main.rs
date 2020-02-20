@@ -5,6 +5,7 @@ extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
 extern crate dotenv;
+extern crate reqwest;
 
 use dotenv::dotenv;
 use rocket::config::{Config, Environment};
@@ -17,7 +18,7 @@ use db::*;
 
 fn main() {
     dotenv().ok();
-    rocket()
+    let _res = rocket()
         .mount("/", routes![define, add, request])
         .register(catchers![not_found])
         .launch();
@@ -46,8 +47,7 @@ fn get_port_from_env_or_default(default: u16) -> u16 {
 
 #[get("/define/<term>")]
 async fn define(term: String) -> Result<Json<DefinitionsResult>, JsonValue> {
-    let client = ElasticClient::new(); // TODO: make this a global shared client somehow
-    match get_definition(client, term).await {
+    match get_definition(term).await {
         Some(defn) => Ok(Json(defn)),
         _ => Err(json!({"status": "error", "reason": "Term is not defined."})),
     }
