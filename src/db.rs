@@ -1,5 +1,10 @@
+use elasticsearch::{
+    http::transport::{SingleNodeConnectionPool, Transport},
+    Elasticsearch, Error, SearchParts,
+};
 use reqwest;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
@@ -46,7 +51,7 @@ pub fn request_to_be_defined(tbd: ToBeDefined) -> Result<String, &'static str> {
     Ok(tbd.term) // TODO: implement
 }
 
-async fn search_elastic(_term: String) -> Result<DefinitionsResult, reqwest::Error> {
+async fn search_elastic_reqwest(_term: String) -> Result<DefinitionsResult, reqwest::Error> {
     let mut body = HashMap::new();
     let mut query: HashMap<String, HashMap<_, _>> = HashMap::new();
     let match_all: HashMap<String, String> = HashMap::new();
@@ -61,6 +66,33 @@ async fn search_elastic(_term: String) -> Result<DefinitionsResult, reqwest::Err
     let content = res.text().await?;
     println!("{}", content);
 
+    Ok(dummy_get_response()) // TODO: remove
+}
+
+async fn search_elastic(term: String) -> Result<DefinitionsResult, elasticsearch::Error> {
+    let transport = Transport::single_node(AWS_ES_ENDPOINT)?;
+    let client = Elasticsearch::new(transport);
+    let search_response = client
+        .search(SearchParts::None)
+        .body(json!({
+          "query": {
+              "match_phrase": {
+                  "term": term
+                }
+          }
+        }))
+        .allow_no_indices(true)
+        .send()
+        .await?;
+
+    // read the response body. Consumes search_response
+    let response_body = search_response.read_body::<Value>().await?;
+    println!("{}", response_body);
+
+    let hits = response_body["hits"].as_object().unwrap();
+    let hits = hits["hits"].as_array().unwrap();
+
+    println!("{} hits", hits.len());
     Ok(dummy_get_response()) // TODO: remove
 }
 
