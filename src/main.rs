@@ -4,7 +4,6 @@
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
-extern crate elastic;
 
 use rocket::config::{Config, Environment};
 use rocket::Rocket;

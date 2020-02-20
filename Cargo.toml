@@ -9,8 +9,6 @@ edition = "2018"
 [dependencies]
 rocket = "0.4.2"
 serde = { version = "1.0", features = ["derive"] }
-elastic = "*"
-elastic_derive = "*"
 
 [dependencies.rocket_contrib]
 version = "0.4.2"
