@@ -11,7 +11,12 @@
         {
             "definition": str,
             "example_sentence": str,
-            "tags": [str, ...]
+            "tags": [
+                {
+                    "tag_name": str
+                }, 
+                ...
+                ]
         },
         ...
     ]
@@ -28,12 +33,38 @@ If the term has a definition:
         {
             "definition": "A Greeting",
             "example_sentence": "Hello, world!",
-            "tags": ["greeting", "marketing", "sales", "automation"]
+            "tags": [
+                {
+                    "tag_name": "greeting"
+                }, 
+                {
+                    "tag_name": "marketing"
+                }, 
+                {
+                    "tag_name":  "sales"
+                },
+                {
+                    "tag_name": "automation"
+                }
+            ]
         },
         {
             "definition": "The opposite of goodbye",
             "example_sentence": "Don't say goodbye when you arrive, say hello.",
-            "tags": ["greeting", "sales", "automation", "grammar"]
+            "tags": [
+                {
+                    "tag_name": "greeting"
+                }, 
+                {
+                    "tag_name": "marketing"
+                }, 
+                {
+                    "tag_name":  "sales"
+                },
+                {
+                    "tag_name": "automation"
+                }
+            ]
         }
     ]
 }
