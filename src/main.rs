@@ -4,7 +4,9 @@
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
+extern crate dotenv;
 
+use dotenv::dotenv;
 use rocket::config::{Config, Environment};
 use rocket::Rocket;
 use rocket_contrib::json::{Json, JsonValue};
@@ -14,6 +16,7 @@ mod db;
 use db::*;
 
 fn main() {
+    dotenv().ok();
     rocket()
         .mount("/", routes![define, add, request])
         .register(catchers![not_found])
@@ -21,15 +24,14 @@ fn main() {
 }
 
 fn rocket() -> Rocket {
-    let rocket_env = env::var("ROCKET_ENV").unwrap();
-    let rocket_instance = if rocket_env == "prod" {
-        let port = get_port_from_env_or_default(8000);
+    let is_in_production = env::var("ROCKET_ENV").unwrap() == "production";
+    if is_in_production {
+        let port = get_port_from_env_or_default(8001);
         let config = Config::build(Environment::Production).port(port).unwrap();
         rocket::custom(config)
     } else {
         rocket::ignite()
-    };
-    rocket_instance
+    }
 }
 
 fn get_port_from_env_or_default(default: u16) -> u16 {
