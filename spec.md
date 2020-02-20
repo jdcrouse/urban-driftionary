@@ -86,7 +86,12 @@ Else:
     "term": str,
     "definition": str,
     "example_sentence": str,
-    "tags": [str, ...]
+    "tags": [
+        {
+            "tag_name": str
+        }, 
+        ...
+    ]
 }
 ```
 
@@ -96,7 +101,20 @@ Example Request:
     "term": "Hello",
     "definition": "This is another definition for 'Hello'",
     "example_sentence": "Hello from the other side.",
-    "tags": ["greetings", "marketing", "automation"]
+    "tags": [
+        {
+            "tag_name": "greeting"
+        }, 
+        {
+            "tag_name": "marketing"
+        }, 
+        {
+            "tag_name":  "sales"
+        },
+        {
+            "tag_name": "automation"
+        }
+    ]
 }
 ```
 
