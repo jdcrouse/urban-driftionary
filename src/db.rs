@@ -90,7 +90,35 @@ async fn search_elastic(term: String) -> Result<DefinitionsResult, elasticsearch
     println!("{}", response_body);
 
     let hits = response_body["hits"].as_object().unwrap();
+    
+    #[derive(Deserialize)]
+    struct Tag {
+        tag_name: String
+    }
+    #[derive(Deserialize)]
+    struct DefinitionObj {
+        definition: String,
+        example: String,
+        score: usize,
+        tags: Vec<Tag>
+    }
+    #[derive(Deserialize)]
+    struct DefinitionsObj {
+        definitions: Vec<DefinitionObj>,
+        term: String
+    }
+    #[derive(Deserialize)]
+    struct Hit {
+        _id: String,
+        _source: DefinitionsObj
+    }
+
     let hits = hits["hits"].as_array().unwrap();
+
+    for hit in hits {
+        let hit: Hit = serde_json::from_value(hit.to_owned()).unwrap();
+        println!("{}", hit._source.term);
+    }
 
     println!("{} hits", hits.len());
     Ok(dummy_get_response()) // TODO: remove
