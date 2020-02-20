@@ -1,5 +1,4 @@
 use reqwest;
-use reqwest::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -39,7 +38,7 @@ pub fn add_definition(definition: AddDefinition) -> Result<String, &'static str>
 pub async fn get_definition(term: String) -> Option<DefinitionsResult> {
     match search_elastic(term).await {
         Ok(defn) => Some(defn),
-        Err(e) => None,
+        Err(_e) => None,
     }
 }
 
@@ -47,7 +46,7 @@ pub fn request_to_be_defined(tbd: ToBeDefined) -> Result<String, &'static str> {
     Ok(tbd.term) // TODO: implement
 }
 
-async fn search_elastic(term: String) -> Result<DefinitionsResult, Error> {
+async fn search_elastic(_term: String) -> Result<DefinitionsResult, reqwest::Error> {
     let mut body = HashMap::new();
     let mut query: HashMap<String, HashMap<_, _>> = HashMap::new();
     let match_all: HashMap<String, String> = HashMap::new();

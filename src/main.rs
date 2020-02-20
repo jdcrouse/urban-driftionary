@@ -1,11 +1,10 @@
 #![feature(proc_macro_hygiene, decl_macro)]
+#![warn(unused_extern_crates)]
 
 #[macro_use]
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
-extern crate dotenv;
-extern crate reqwest;
 
 use dotenv::dotenv;
 use rocket::config::{Config, Environment};
