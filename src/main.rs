@@ -26,7 +26,7 @@ fn main() {
 fn rocket() -> Rocket {
     let is_in_production = env::var("ROCKET_ENV").unwrap() == "production";
     if is_in_production {
-        let port = get_port_from_env_or_default(8001);
+        let port = get_port_from_env_or_default(8000);
         let config = Config::build(Environment::Production).port(port).unwrap();
         rocket::custom(config)
     } else {
@@ -45,8 +45,9 @@ fn get_port_from_env_or_default(default: u16) -> u16 {
 }
 
 #[get("/define/<term>")]
-fn define(term: String) -> Result<Json<DefinitionsResult>, JsonValue> {
-    match get_definition(term) {
+async fn define(term: String) -> Result<Json<DefinitionsResult>, JsonValue> {
+    let client = ElasticClient::new(); // TODO: make this a global shared client somehow
+    match get_definition(client, term).await {
         Some(defn) => Ok(Json(defn)),
         _ => Err(json!({"status": "error", "reason": "Term is not defined."})),
     }
