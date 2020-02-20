@@ -1,23 +1,28 @@
-use elasticsearch::{
-    http::transport::{SingleNodeConnectionPool, Transport},
-    Elasticsearch, Error, SearchParts,
-};
-use reqwest;
+use elasticsearch::{http::transport::Transport, Elasticsearch, SearchParts};
+
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
+struct Hit {
+    _id: String,
+    _source: DefinitionsResult,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DefinitionsResult {
     pub term: String,
     pub definitions: Vec<DefinitionDetail>,
 }
-
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DefinitionDetail {
     pub definition: String,
-    pub example_sentence: String,
-    pub tags: Vec<String>,
+    pub example: String,
+    pub tags: Vec<Tag>,
+}
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Tag {
+    pub tag_name: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,7 +39,6 @@ pub struct ToBeDefined {
 }
 
 const AWS_ES_ENDPOINT: &str = "https://search-es-driftionary-kq77fbn6hvsqt3psu3htuga7gi.us-east-1.es.amazonaws.com/es-driftionary";
-const SEARCH_PATH: &str = "/_search";
 
 pub fn add_definition(definition: AddDefinition) -> Result<String, &'static str> {
     Ok(definition.term) // TODO: implement
@@ -49,24 +53,6 @@ pub async fn get_definition(term: String) -> Option<DefinitionsResult> {
 
 pub fn request_to_be_defined(tbd: ToBeDefined) -> Result<String, &'static str> {
     Ok(tbd.term) // TODO: implement
-}
-
-async fn search_elastic_reqwest(_term: String) -> Result<DefinitionsResult, reqwest::Error> {
-    let mut body = HashMap::new();
-    let mut query: HashMap<String, HashMap<_, _>> = HashMap::new();
-    let match_all: HashMap<String, String> = HashMap::new();
-    query.insert("match_all".to_owned(), match_all);
-    body.insert("query", query);
-
-    let client = reqwest::Client::new();
-    let endpoint = format!("{}{}", &AWS_ES_ENDPOINT, &SEARCH_PATH);
-    let res = client.post(&endpoint).json(&body).send().await?;
-    println!("{}", res.status());
-
-    let content = res.text().await?;
-    println!("{}", content);
-
-    Ok(dummy_get_response()) // TODO: remove
 }
 
 async fn search_elastic(term: String) -> Result<DefinitionsResult, elasticsearch::Error> {
@@ -84,58 +70,10 @@ async fn search_elastic(term: String) -> Result<DefinitionsResult, elasticsearch
         .allow_no_indices(true)
         .send()
         .await?;
-
-    // read the response body. Consumes search_response
     let response_body = search_response.read_body::<Value>().await?;
-    println!("{}", response_body);
-
     let hits = response_body["hits"].as_object().unwrap();
-    
-    #[derive(Deserialize)]
-    struct Tag {
-        tag_name: String
-    }
-    #[derive(Deserialize)]
-    struct DefinitionObj {
-        definition: String,
-        example: String,
-        score: usize,
-        tags: Vec<Tag>
-    }
-    #[derive(Deserialize)]
-    struct DefinitionsObj {
-        definitions: Vec<DefinitionObj>,
-        term: String
-    }
-    #[derive(Deserialize)]
-    struct Hit {
-        _id: String,
-        _source: DefinitionsObj
-    }
+    let hits: Vec<Hit> = serde_json::from_value(hits["hits"].to_owned()).unwrap();
+    let first_result = hits.get(0).unwrap();
 
-    let hits = hits["hits"].as_array().unwrap();
-
-    for hit in hits {
-        let hit: Hit = serde_json::from_value(hit.to_owned()).unwrap();
-        println!("{}", hit._source.term);
-    }
-
-    println!("{} hits", hits.len());
-    Ok(dummy_get_response()) // TODO: remove
-}
-
-fn dummy_get_response() -> DefinitionsResult {
-    // TODO: remove
-    DefinitionsResult {
-        term: String::from("Drift"),
-        definitions: vec![DefinitionDetail {
-            definition: String::from("A wonderful place to work"),
-            example_sentence: String::from("I sure do enjoy working at Drift"),
-            tags: vec![
-                String::from("company"),
-                String::from("marketing"),
-                String::from("sales"),
-            ],
-        }],
-    }
+    Ok(first_result._source.clone())
 }
