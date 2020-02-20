@@ -17,19 +17,33 @@ mod db;
 use db::*;
 
 fn main() {
-    rocket().launch();
+    rocket()
+        .mount("/", routes![define, add, request])
+        .register(catchers![not_found])
+        .launch();
 }
 
 fn rocket() -> Rocket {
     // TODO: add environment configs
 
-    let port = get_port_from_env_or_default(8000);
-    let config = Config::build(Environment::Staging).port(port).unwrap();
+    let builder = SyncClientBuilder::new()
+        .base_url(
+            "https://search-es-driftionary-kq77fbn6hvsqt3psu3htuga7gi.us-east-1.es.amazonaws.com",
+        )
+        .params(|p| p.header(Authorization("".to_owned())));
+    builder.build().unwrap()
+}
 
-    rocket::custom(config)
-        .mount("/define", routes![define])
-        .mount("/add", routes![add])
-        .register(catchers![not_found])
+fn rocket() -> Rocket {
+    let rocket_env = env::var("ROCKET_ENV").unwrap();
+    let rocket_instance = if rocket_env == "prod" {
+        let port = get_port_from_env_or_default(8000);
+        let config = Config::build(Environment::Production).port(port).unwrap();
+        rocket::custom(config)
+    } else {
+        rocket::ignite()
+    };
+    rocket_instance
 }
 
 fn get_port_from_env_or_default(default: u16) -> u16 {
@@ -42,7 +56,7 @@ fn get_port_from_env_or_default(default: u16) -> u16 {
     }
 }
 
-#[get("/<term>")]
+#[get("/define/<term>")]
 fn define(term: String) -> Result<Json<DefinitionsResult>, JsonValue> {
     match get_definition(term) {
         Some(defn) => Ok(Json(defn)),
@@ -50,11 +64,20 @@ fn define(term: String) -> Result<Json<DefinitionsResult>, JsonValue> {
     }
 }
 
-#[post("/", format = "json", data = "<definition>")]
+#[post("/add", format = "json", data = "<definition>")]
 fn add(definition: Json<AddDefinition>) -> JsonValue {
     let definition = definition.into_inner();
     match add_definition(definition) {
         Ok(term) => json!({ "status": "ok", "term_defined": term }),
+        Err(e) => json!({"status": "error", "reason": e}),
+    }
+}
+
+#[post("/request", format = "json", data = "<tbd>")]
+fn request(tbd: Json<ToBeDefined>) -> JsonValue {
+    let tbd = tbd.into_inner();
+    match request_to_be_defined(tbd) {
+        Ok(term) => json!({ "status": "ok", "term_to_be_defined": term }),
         Err(e) => json!({"status": "error", "reason": e}),
     }
 }

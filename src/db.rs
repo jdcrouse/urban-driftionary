@@ -21,6 +21,11 @@ pub struct AddDefinition {
     pub tags: Vec<String>,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ToBeDefined {
+    pub term: String,
+}
+
 pub fn add_definition(definition: AddDefinition) -> Result<String, &'static str> {
     Ok(definition.term) // TODO
 }
@@ -38,4 +43,8 @@ pub fn get_definition(term: String) -> Option<DefinitionsResult> {
             ],
         }],
     })
+}
+
+pub fn request_to_be_defined(tbd: ToBeDefined) -> Result<String, &'static str> {
+    Ok(tbd.term) // TODO
 }
