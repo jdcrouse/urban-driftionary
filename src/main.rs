@@ -5,8 +5,6 @@ extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
 extern crate elastic;
-#[macro_use]
-extern crate elastic_derive;
 
 use rocket::config::{Config, Environment};
 use rocket::Rocket;
@@ -21,17 +19,6 @@ fn main() {
         .mount("/", routes![define, add, request])
         .register(catchers![not_found])
         .launch();
-}
-
-fn rocket() -> Rocket {
-    // TODO: add environment configs
-
-    let builder = SyncClientBuilder::new()
-        .base_url(
-            "https://search-es-driftionary-kq77fbn6hvsqt3psu3htuga7gi.us-east-1.es.amazonaws.com",
-        )
-        .params(|p| p.header(Authorization("".to_owned())));
-    builder.build().unwrap()
 }
 
 fn rocket() -> Rocket {
