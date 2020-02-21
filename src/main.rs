@@ -7,19 +7,21 @@ extern crate rocket;
 extern crate rocket_contrib;
 
 use dotenv::dotenv;
-use rocket::config::{Config, Environment};
-use rocket::Rocket;
+use rocket::{Rocket, config::{Config, Environment}};
 use rocket_contrib::json::{Json, JsonValue};
 use std::env;
 
 mod db;
 use db::*;
 
+mod cors;
+use cors::CORS;
+
 fn main() {
     dotenv().ok();
     let _res = rocket()
-        .mount("/", routes![define, add, request])
-        .register(catchers![not_found])
+        .mount("/", routes![define, add, request, options])
+        .attach(CORS())
         .launch();
 }
 
@@ -42,6 +44,11 @@ fn get_port_from_env_or_default(default: u16) -> u16 {
         },
         _ => default,
     }
+}
+
+#[options("/define/<_term>")]
+async fn options(_term: String) -> Result<(), ()> {
+    Ok(())
 }
 
 #[get("/define/<term>")]
@@ -68,12 +75,4 @@ fn request(tbd: Json<ToBeDefined>) -> JsonValue {
         Ok(term) => json!({ "status": "ok", "term_to_be_defined": term }),
         Err(e) => json!({"status": "error", "reason": e}),
     }
-}
-
-#[catch(404)]
-fn not_found() -> JsonValue {
-    json!({
-        "status": "error",
-        "reason": "Resource was not found."
-    })
 }
